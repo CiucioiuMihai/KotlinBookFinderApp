@@ -90,155 +90,156 @@ fun BookDetailsScreen(
     var isInFavorites by remember { mutableStateOf(false) }
     var isInReadingList by remember { mutableStateOf(false) }
 
-    Column(
+    LazyColumn(
         modifier = Modifier.fillMaxSize().padding(24.dp),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start
     ) {
-        Text(
-            text = currentBook.title,
-            style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-
-        if (!currentBook.authors.isNullOrEmpty()) {
+        item {
             Text(
-                text = "By: ${currentBook.authors.joinToString(", ")}",
+                text = currentBook.title,
+                style = MaterialTheme.typography.headlineMedium,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
-        }
 
-        // Add to favorites and reading list buttons
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Button(
-                onClick = {
-                    userId?.let {
-                        if (!isInFavorites) {
-                            bookViewModel.addBookToFavorites(it, currentBook)
-                        } else {
-                            bookViewModel.removeBookFromFavorites(it, currentBook.id)
-                        }
-                        isInFavorites = !isInFavorites
-                    }
-                },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = if (isInFavorites)
-                        MaterialTheme.colorScheme.primary
-                    else
-                        MaterialTheme.colorScheme.surfaceVariant,
-                    contentColor = if (isInFavorites)
-                        MaterialTheme.colorScheme.onPrimary
-                    else
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                ),
-                modifier = Modifier.weight(1f)
+            if (!currentBook.authors.isNullOrEmpty()) {
+                Text(
+                    text = "By: ${currentBook.authors.joinToString(", ")}",
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+            }
+
+            // Add to favorites and reading list buttons
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        if (isInFavorites) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
-                        contentDescription = "Favorite"
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(text = if (isInFavorites) "In Favorites" else "Add to Favorites")
+                Button(
+                    onClick = {
+                        userId?.let {
+                            if (!isInFavorites) {
+                                bookViewModel.addBookToFavorites(it, currentBook)
+                            } else {
+                                bookViewModel.removeBookFromFavorites(it, currentBook.id)
+                            }
+                            isInFavorites = !isInFavorites
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (isInFavorites)
+                            MaterialTheme.colorScheme.primary
+                        else
+                            MaterialTheme.colorScheme.surfaceVariant,
+                        contentColor = if (isInFavorites)
+                            MaterialTheme.colorScheme.onPrimary
+                        else
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                    ),
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            if (isInFavorites) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                            contentDescription = "Favorite"
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(text = if (isInFavorites) "In Favorites" else "Add to Favorites")
+                    }
+                }
+
+                Button(
+                    onClick = {
+                        userId?.let {
+                            if (!isInReadingList) {
+                                bookViewModel.addBookToReadingList(it, currentBook)
+                            } else {
+                                bookViewModel.removeBookFromReadingList(it, currentBook.id)
+                            }
+                            isInReadingList = !isInReadingList
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (isInReadingList)
+                            MaterialTheme.colorScheme.secondary
+                        else
+                            MaterialTheme.colorScheme.surfaceVariant,
+                        contentColor = if (isInReadingList)
+                            MaterialTheme.colorScheme.onSecondary
+                        else
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                    ),
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Filled.Add, contentDescription = "Reading List")
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(text = if (isInReadingList) "In Reading List" else "Add to Reading List")
+                    }
                 }
             }
 
-            Button(
-                onClick = {
-                    userId?.let {
-                        if (!isInReadingList) {
-                            bookViewModel.addBookToReadingList(it, currentBook)
-                        } else {
-                            bookViewModel.removeBookFromReadingList(it, currentBook.id)
-                        }
-                        isInReadingList = !isInReadingList
-                    }
-                },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = if (isInReadingList)
-                        MaterialTheme.colorScheme.secondary
-                    else
-                        MaterialTheme.colorScheme.surfaceVariant,
-                    contentColor = if (isInReadingList)
-                        MaterialTheme.colorScheme.onSecondary
-                    else
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                ),
-                modifier = Modifier.weight(1f)
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Filled.Add, contentDescription = "Reading List")
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(text = if (isInReadingList) "In Reading List" else "Add to Reading List")
+            if (!currentBook.description.isNullOrBlank()) {
+                Text(
+                    text = "Description:",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(top = 16.dp, bottom = 4.dp)
+                )
+                Text(text = currentBook.description, modifier = Modifier.padding(bottom = 16.dp))
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(onClick = { showForm = !showForm }) {
+                Text(if (showForm) "Cancel" else "Add a Review")
+            }
+            if (showForm) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = "Your Rating: ${rating.toInt()}")
+                Slider(
+                    value = rating,
+                    onValueChange = { rating = it },
+                    valueRange = 1f..5f,
+                    steps = 3
+                )
+                OutlinedTextField(
+                    value = reviewText,
+                    onValueChange = { reviewText = it },
+                    label = { Text("Your review") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Button(
+                    onClick = {
+                        val newReview = Review(
+                            bookId = currentBook.id,
+                            userId = authViewModel.userId ?: "",
+                            userName = authViewModel.userName ?: "Anonymous",
+                            rating = rating.toInt(),
+                            review = reviewText,
+                            createdAt = System.currentTimeMillis()
+                        )
+                        reviewViewModel.addReview(newReview)
+                        reviewText = ""
+                        rating = 3f
+                        showForm = false
+                    },
+                    modifier = Modifier.fillMaxWidth() // changed from align(Alignment.End)
+                ) {
+                    Text("Submit Review")
                 }
             }
-        }
-
-        if (!currentBook.description.isNullOrBlank()) {
+            Spacer(modifier = Modifier.height(24.dp))
             Text(
-                text = "Description:",
+                text = "Reviews:",
                 style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(top = 16.dp, bottom = 4.dp)
+                modifier = Modifier.padding(bottom = 8.dp)
             )
-            Text(text = currentBook.description, modifier = Modifier.padding(bottom = 16.dp))
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-        Button(onClick = { showForm = !showForm }) {
-            Text(if (showForm) "Cancel" else "Add a Review")
-        }
-        if (showForm) {
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(text = "Your Rating: ${rating.toInt()}")
-            Slider(
-                value = rating,
-                onValueChange = { rating = it },
-                valueRange = 1f..5f,
-                steps = 3
-            )
-            OutlinedTextField(
-                value = reviewText,
-                onValueChange = { reviewText = it },
-                label = { Text("Your review") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Button(
-                onClick = {
-                    val newReview = Review(
-                        bookId = currentBook.id,
-                        userId = authViewModel.userId ?: "",
-                        userName = authViewModel.userName ?: "Anonymous",
-                        rating = rating.toInt(),
-                        review = reviewText,
-                        createdAt = System.currentTimeMillis()
-                    )
-                    reviewViewModel.addReview(newReview)
-                    reviewText = ""
-                    rating = 3f
-                    showForm = false
-                },
-                modifier = Modifier.align(Alignment.End)
-            ) {
-                Text("Submit Review")
+            if (reviews.isEmpty()) {
+                Text(text = "No reviews yet.")
             }
         }
-        Spacer(modifier = Modifier.height(24.dp))
-        Text(
-            text = "Reviews:",
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-        if (reviews.isEmpty()) {
-            Text(text = "No reviews yet.")
-        } else {
-            LazyColumn {
-                items(reviews) { review ->
-                    ReviewItem(review)
-                }
+        if (reviews.isNotEmpty()) {
+            items(reviews) { review ->
+                ReviewItem(review)
             }
         }
     }
